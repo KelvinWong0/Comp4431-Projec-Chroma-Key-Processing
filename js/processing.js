@@ -399,7 +399,24 @@ var effects = {
 
             
         }
-    }
+    },
+    chroma1: {
+        setup: function() {
+            // Initialize the duration of the output video
+            outputDuration = input1FramesBuffer.length;
+
+            // Prepare the array for storing the output frames
+            outputFramesBuffer = new Array(outputDuration);
+        },
+        process: function(idx) {
+            // Put the frames in reverse order
+            outputFramesBuffer[idx] = input1FramesBuffer[(outputDuration - 1) - idx];
+
+            // Notify the finish of a frame
+            finishFrame();
+        }
+    },
+    
 };
 
 // Handler for the "Apply" button click event
@@ -423,6 +440,9 @@ function applyEffect(e) {
             break;
         case "crossFade":
             currentEffect = effects.crossFade;
+            break;
+        case "chroma1":
+            currentEffect = effects.chroma1;
             break;
         default:
             // Do nothing
