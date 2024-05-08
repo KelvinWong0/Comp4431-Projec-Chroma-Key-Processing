@@ -453,7 +453,7 @@ var effects = {
                     const KEY_G = 255;
                     const KEY_B = 0;
 
-                    console.log(TOLERANCE);
+                    //console.log(TOLERANCE);
 
                     for (let i = 0; i < imageData1.data.length; i += 4) {
                         imageData.data[i]     =  0;// Red
@@ -472,14 +472,13 @@ var effects = {
                         if (distance < TOLERANCE) {
                            // console.log("replace");
                             // Replace with the background pixel
-                            //imageData.data[i] = 0;     // R
-                            //imageData.data[i + 1] = 0; // G
-                            //imageData.data[i + 2] = 0; // B
-                            // You can also copy over the alpha value if your videos do not have transparency:
-                            // imageData.data[i + 3] = imageData2.data[i + 3]; // A
-                            imageData.data[i] = 0;
-                            imageData.data[i + 1] = 0;
-                            imageData.data[i + 2] = 0;
+                            imageData.data[i] = imageData2.data[i];
+                            imageData.data[i + 1] = imageData2.data[i+1];
+                            imageData.data[i + 2] = imageData2.data[i+2];
+
+                            // imageData.data[i] = 0;
+                            // imageData.data[i + 1] = 0;
+                            // imageData.data[i + 2] = 0;
                         } else {
                             //console.log("keep");
                             // Else, keep the original pixel from the foreground image
