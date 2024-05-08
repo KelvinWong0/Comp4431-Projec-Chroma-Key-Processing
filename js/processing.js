@@ -402,6 +402,10 @@ var effects = {
     },
     chroma1: {
         setup: function() {
+            // Prepare the parameters
+            this.chromaThreshold =
+                parseFloat($("#chroma1-threshold").val());
+
             // Initialize the duration of the output video
             outputDuration = input1FramesBuffer.length;
 
@@ -409,11 +413,93 @@ var effects = {
             outputFramesBuffer = new Array(outputDuration);
         },
         process: function(idx) {
-            // Put the frames in reverse order
-            outputFramesBuffer[idx] = input1FramesBuffer[(outputDuration - 1) - idx];
+             // Use a canvas to store input-frame content
+             var w1 = $("#input-video-1").get(0).videoWidth;
+             var h1 = $("#input-video-1").get(0).videoHeight;
+             var canvas1 = getCanvas(w1, h1);
+             var ctx1 = canvas1.getContext('2d');
+             // Use a canvas to store BG-frame content
+             var w2 = $("#input-video-2").get(0).videoWidth;
+             var h2 = $("#input-video-2").get(0).videoHeight;
+             var canvas2 = getCanvas(w2, h2);
+             var ctx2 = canvas2.getContext('2d');
+             //OUT
+             var canvas = getCanvas(w1, h1);
+             var ctx = canvas.getContext('2d');
 
-            // Notify the finish of a frame
-            finishFrame();
+             /*
+             * TODO
+             */        
+            var imageData = ctx.getImageData(0, 0, w1, h1);
+            // Tolerance for color matching
+            var TOLERANCE = this.chromaThreshold;
+            //console.log(TOLERANCE);
+            
+            var front_img = new Image();
+            front_img.onload = function() {
+                // Get the image data object of the current frame
+                ctx1.drawImage(front_img, 0, 0);
+                var imageData1 = ctx1.getImageData(0, 0, w1, h1);
+                
+                var back_img = new Image();
+                back_img.onload = function() {
+                    // Get the image data object of the current frame
+                    ctx2.drawImage(back_img, 0, 0, w1, h1);//ensure background not larger than front
+                    var imageData2 = ctx2.getImageData(0, 0, w1, h1);
+
+                    //Chroma
+                    // Chroma key color (green)
+                    const KEY_R = 0;
+                    const KEY_G = 255;
+                    const KEY_B = 0;
+
+                    console.log(TOLERANCE);
+
+                    for (let i = 0; i < imageData1.data.length; i += 4) {
+                        imageData.data[i]     =  0;// Red
+                        imageData.data[i + 1] =  0;// Green
+                        imageData.data[i + 2] =  0;// Blue
+                        imageData.data[i + 3] =  255;//hue
+                        // Get RGB values
+                        let r = imageData1.data[i];
+                        let g = imageData1.data[i + 1];
+                        let b = imageData1.data[i + 2];
+
+                        // Calculate the distance to the key color (442 means sqrt((255)^2+(255)^2+(255)^2))
+                        let distance = (Math.sqrt((KEY_R - r) ** 2 + (KEY_G - g) ** 2 + (KEY_B - b) ** 2))/442;
+
+                        // If the current pixel's color is close to the chroma key color
+                        if (distance < TOLERANCE) {
+                           // console.log("replace");
+                            // Replace with the background pixel
+                            //imageData.data[i] = 0;     // R
+                            //imageData.data[i + 1] = 0; // G
+                            //imageData.data[i + 2] = 0; // B
+                            // You can also copy over the alpha value if your videos do not have transparency:
+                            // imageData.data[i + 3] = imageData2.data[i + 3]; // A
+                            imageData.data[i] = 0;
+                            imageData.data[i + 1] = 0;
+                            imageData.data[i + 2] = 0;
+                        } else {
+                            //console.log("keep");
+                            // Else, keep the original pixel from the foreground image
+                            imageData.data[i] = imageData1.data[i];     // R
+                            imageData.data[i + 1] = imageData1.data[i + 1]; // G
+                            imageData.data[i + 2] = imageData1.data[i + 2]; // B
+                            // Copy alpha value
+                            imageData.data[i + 3] = imageData1.data[i + 3]; // A
+                        }
+                    }
+
+
+                    //OUT
+                    ctx.putImageData(imageData, 0, 0);
+                    outputFramesBuffer[idx] = canvas.toDataURL("image/webp");
+                    finishFrame();
+                 };
+                back_img.src = input2FramesBuffer[idx];
+            };
+            front_img.src = input1FramesBuffer[idx];
         }
     },
     
