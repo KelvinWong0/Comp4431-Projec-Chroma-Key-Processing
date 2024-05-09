@@ -267,6 +267,14 @@ function useEyeDropper(e){
         resultElement.textContent = e;
       });
 }
+function toggleInput() {
+    if ($("#use-smooth").prop("checked")) {
+        $("#kernel-size").prop("disabled", false);
+    } else {
+        $("#kernel-size").prop("disabled", true);
+    }
+}
+
 // Set up the event handlers for various GUI elements
 // when the page is fully loaded.
 $(function() {
@@ -278,4 +286,5 @@ $(function() {
     $("#apply-effect").on("click", applyEffect);
     $("#cancel-processing").on("click", function() {stopProcessingFlag = true;});
     $("#dropper-button").on("click", useEyeDropper);
+    $("#use-smooth").on("change", toggleInput);
 });

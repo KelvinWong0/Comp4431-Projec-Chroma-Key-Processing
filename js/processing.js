@@ -92,6 +92,64 @@ function fromHSVToRGB(h, s, v) {
             "g": Math.round(g * 255),
             "b": Math.round(b * 255)};
 }
+function getPixel(imageData, x, y, border) {
+    // Handle the boundary cases
+    if (x < 0)
+        x = (border=="wrap")? imageData.width + (x % imageData.width) : 0;
+    if (x >= imageData.width)
+        x = (border=="wrap")? x % imageData.width : imageData.width - 1;
+    if (y < 0)
+        y = (border=="wrap")? imageData.height + (y % imageData.height) : 0;
+    if (y >= imageData.height)
+        y = (border=="wrap")? y % imageData.height : imageData.height - 1;
+
+    var i = (x + y * imageData.width) * 4;
+    return {
+        r: imageData.data[i],
+        g: imageData.data[i + 1],
+        b: imageData.data[i + 2],
+        a: imageData.data[i + 3]
+    };
+}
+function blur( inputData, kernelSize){
+    var kernel = new Array(kernelSize);
+
+    for (var i = 0; i < kernelSize; i++) {
+        kernel[i] = new Array(kernelSize);
+        for (var j = 0; j < kernelSize; j++) {
+            kernel[i][j] = 1;
+        }
+    }
+
+    // Apply the kernel to the whole image
+    for (var y = 0; y < inputData.height; y++) {
+        for (var x = 0; x < inputData.width; x++) {
+            // Use imageproc.getPixel() to get the pixel values
+            // over the kernel
+            var pad = (kernelSize - 1) /2;
+            var r_sum = 0;
+            var g_sum = 0;
+            var b_sum = 0;
+            for (var j = -pad; j <= pad; j++) {
+                for (var i = -pad; i <= pad; i++) {
+                    var pixel = getPixel(inputData, x+i,y+j);
+                    r_sum += pixel.r * kernel[i+pad][j+pad];
+                    g_sum += pixel.g * kernel[i+pad][j+pad];
+                    b_sum += pixel.b * kernel[i+pad][j+pad];
+                }
+            }
+            r_sum = Math.floor(r_sum/(kernelSize*kernelSize));
+            g_sum = Math.floor(g_sum/(kernelSize*kernelSize));
+            b_sum = Math.floor(b_sum/(kernelSize*kernelSize));
+
+            // Then set the blurred result to the output data
+            var i = (x + y * inputData.width) * 4;
+            inputData.data[i]     = r_sum;
+            inputData.data[i + 1] = g_sum;
+            inputData.data[i + 2] = b_sum;
+        }
+    }
+}
 
 // Definition of various video effects
 //
@@ -108,6 +166,8 @@ var effects = {
             this.chromaThreshold =
                 parseFloat($("#rgb-threshold").val());
             console.log($("#use-dropper").prop("checked"));
+            console.log($("#use-smooth").prop("checked"));
+            console.log($("#kernel-size").val());
             // Initialize the duration of the output video
             outputDuration = input1FramesBuffer.length;
 
@@ -185,18 +245,35 @@ var effects = {
                             imageData.data[i + 1] = imageData2.data[i+1];
                             imageData.data[i + 2] = imageData2.data[i+2];
 
-                            // imageData.data[i] = 0;
-                            // imageData.data[i + 1] = 0;
-                            // imageData.data[i + 2] = 0;
+                            if($("#use-smooth").prop("checked")){
+                                imageData.data[i] = 0;
+                                imageData.data[i + 1] = 0;
+                                imageData.data[i + 2] = 0;
+                            }
+                            
                         } else {
                             //console.log("keep");
                             // Else, keep the original pixel from the foreground image
                             imageData.data[i] = imageData1.data[i];     // R
                             imageData.data[i + 1] = imageData1.data[i + 1]; // G
                             imageData.data[i + 2] = imageData1.data[i + 2]; // B
-                            // Copy alpha value
-                            imageData.data[i + 3] = imageData1.data[i + 3]; // A
+
+                            if($("#use-smooth").prop("checked")){
+                                imageData.data[i] = 255;
+                                imageData.data[i + 1] = 255;
+                                imageData.data[i + 2] = 255;
+                            }
                         }
+                    }
+
+                    if($("#use-smooth").prop("checked")){
+                        blur(imageData,$("#kernel-size").val());
+                        for (let i = 0; i < imageData1.data.length; i += 4) {
+                            imageData.data[i] = (imageData.data[i]/255)*imageData1.data[i] + ((255-imageData.data[i])/255)*imageData2.data[i];     // R
+                            imageData.data[i + 1] = (imageData.data[i+1]/255)*imageData1.data[i+1] + ((255-imageData.data[i+1])/255)*imageData2.data[i+1];     // R
+                            imageData.data[i + 2] = (imageData.data[i+2]/255)*imageData1.data[i+2] + ((255-imageData.data[i+2])/255)*imageData2.data[i+2];     // R
+                        }
+
                     }
 
 
