@@ -327,6 +327,8 @@ var effects = {
         setup: function() {
             // Prepare the parameters
             //console.log($("#use-dropper").prop("checked"));
+            this.chromaThreshold =
+            parseFloat($("#rgb-threshold").val());
 
             this.GBRatio = parseFloat($("#GB-ratio").val())
 
@@ -351,21 +353,22 @@ var effects = {
              var canvas = getCanvas(w1, h1);
              var ctx = canvas.getContext('2d');
 
+             
              /*
              * TODO
              */        
             var imageData = ctx.getImageData(0, 0, w1, h1);
             //console.log(TOLERANCE);
-
+            
             let KEY_R = 0;
             let KEY_G = 255;
             let KEY_B = 0;
+
             if( $("#use-dropper").prop("checked") ){
                 let components = $("#dropper-result").css("background-color").replace(/rgba?\(|\)/g, '').split(',');
                 KEY_R = parseInt(components[0].trim(), 10);
                 KEY_G = parseInt(components[1].trim(), 10);
                 KEY_B = parseInt(components[2].trim(), 10);
-                console.log(KEY_R,KEY_G,KEY_B);
             }
 
             let k = this.GBRatio
@@ -399,14 +402,77 @@ var effects = {
 
                         // Compute Unknowns
                         var alpha = 1-(g-k*b)/(KEY_G-k*KEY_B)
-                        var R_Foreground = (r-KEY_R*(1-alpha))/alpha
-                        var G_Foreground = (g-KEY_G*(1-alpha))/alpha
-                        var B_Foreground = (b-KEY_B*(1-alpha))/alpha
+                        // if(alpha > 1){
+                        //     alpha = 1
+                        // }
+                        // if(alpha < 0){
+                        //     alpha = 0
+                        // }
+                        var R_Foreground = (r-KEY_R*(1-alpha))
+                        var G_Foreground = (g-KEY_G*(1-alpha))
+                        var B_Foreground = (b-KEY_B*(1-alpha))
+
+
+                        if(R_Foreground > 255){
+                            R_Foreground = 255
+                        }
+                        if(R_Foreground < 0){
+                            R_Foreground = 0
+                        }
+
+                        if(G_Foreground > 255){
+                            G_Foreground = 255
+                        }
+                        if(G_Foreground < 0){
+                            G_Foreground = 0
+                        }
+
+                        if(B_Foreground > 255){
+                            B_Foreground = 255
+                        }
+                        if(B_Foreground < 0){
+                            B_Foreground = 0
+                        }
+
+                        // R_Foreground = R_Foreground/alpha
+                        // G_Foreground = G_Foreground/alpha
+                        // B_Foreground = B_Foreground/alpha
+
 
                         // Combine with background
-                        imageData.data[i]     =  R_Foreground * alpha + imageData2.data[i] * (1-alpha);// Red
-                        imageData.data[i + 1] =  G_Foreground * alpha + imageData2.data[i+1] * (1-alpha);;// Green
-                        imageData.data[i + 2] =  B_Foreground * alpha + imageData2.data[i+2] * (1-alpha);;// Blue
+                        imageData.data[i]     =  R_Foreground  + imageData2.data[i]      * (1-alpha);// Red
+                        imageData.data[i + 1] =  G_Foreground  + imageData2.data[i+1]    * (1-alpha);// Green
+                        imageData.data[i + 2] =  B_Foreground  + imageData2.data[i+2]    * (1-alpha);// Blue
+                        // imageData.data[i]     =  R_Foreground
+                        // imageData.data[i + 1] =  G_Foreground
+                        // imageData.data[i + 2] =  B_Foreground
+                        // imageData.data[i]     =  imageData2.data[i]      * (1-alpha)
+                        // imageData.data[i + 1] =  imageData2.data[i+1]      * (1-alpha)
+                        // imageData.data[i + 2] =  imageData2.data[i+2]      * (1-alpha)
+
+                        if(imageData.data[i] > 255){
+                            imageData.data[i] = 255
+                        }
+                        if(imageData.data[i] < 0){
+                            imageData.data[i] = 0
+                        }
+                        if(imageData.data[i+1] > 255){
+                            imageData.data[i+1] = 255
+                        }
+                        if(imageData.data[i+1] < 0){
+                            imageData.data[i+1] = 0
+                        }
+                        if(imageData.data[i+2] > 255){
+                            imageData.data[i+2] = 255
+                        }
+                        if(imageData.data[i+2] < 0){
+                            imageData.data[i+2] = 0
+                        }
+
+
+
+
+
                     }
 
 
