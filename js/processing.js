@@ -360,6 +360,13 @@ var effects = {
             let KEY_R = 0;
             let KEY_G = 255;
             let KEY_B = 0;
+            if( $("#use-dropper").prop("checked") ){
+                let components = $("#dropper-result").css("background-color").replace(/rgba?\(|\)/g, '').split(',');
+                KEY_R = parseInt(components[0].trim(), 10);
+                KEY_G = parseInt(components[1].trim(), 10);
+                KEY_B = parseInt(components[2].trim(), 10);
+                console.log(KEY_R,KEY_G,KEY_B);
+            }
 
             let k = this.GBRatio
             
