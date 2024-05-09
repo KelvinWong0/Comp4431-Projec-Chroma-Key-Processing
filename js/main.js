@@ -245,6 +245,28 @@ function updateProgressBar(target, newValue) {
     $(target).width(newValue + "%").text(newValue.toFixed(0) + "%");
 }
 
+
+function useEyeDropper(e){
+    const resultElement = document.getElementById("dropper-result");
+  
+    if (!window.EyeDropper) {
+      resultElement.textContent =
+        "Your browser does not support the EyeDropper API";
+      return;
+    }
+  
+    const eyeDropper = new EyeDropper();
+  
+    eyeDropper
+      .open()
+      .then((result) => {
+        resultElement.textContent = result.sRGBHex;
+        resultElement.style.backgroundColor = result.sRGBHex;
+      })
+      .catch((e) => {
+        resultElement.textContent = e;
+      });
+}
 // Set up the event handlers for various GUI elements
 // when the page is fully loaded.
 $(function() {
@@ -255,4 +277,5 @@ $(function() {
     $('a.dropdown-item').on("click", changeTabs);
     $("#apply-effect").on("click", applyEffect);
     $("#cancel-processing").on("click", function() {stopProcessingFlag = true;});
+    $("#dropper-button").on("click", useEyeDropper);
 });

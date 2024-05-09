@@ -405,7 +405,7 @@ var effects = {
             // Prepare the parameters
             this.chromaThreshold =
                 parseFloat($("#chroma1-threshold").val());
-
+            console.log($("#use-dropper").prop("checked"));
             // Initialize the duration of the output video
             outputDuration = input1FramesBuffer.length;
 
@@ -449,10 +449,17 @@ var effects = {
 
                     //Chroma
                     // Chroma key color (green)
-                    const KEY_R = 0;
-                    const KEY_G = 255;
-                    const KEY_B = 0;
-
+                    let KEY_R = 0;
+                    let KEY_G = 255;
+                    let KEY_B = 0;
+                    // use dropper if checked
+                    if( $("#use-dropper").prop("checked") ){
+                        let components = $("#dropper-result").css("background-color").replace(/rgba?\(|\)/g, '').split(',');
+                        KEY_R = parseInt(components[0].trim(), 10);
+                        KEY_G = parseInt(components[1].trim(), 10);
+                        KEY_B = parseInt(components[2].trim(), 10);
+                    }
+                    
                     //console.log(TOLERANCE);
 
                     for (let i = 0; i < imageData1.data.length; i += 4) {
