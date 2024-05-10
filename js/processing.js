@@ -168,6 +168,7 @@ var effects = {
             console.log($("#use-dropper").prop("checked"));
             console.log($("#use-smooth").prop("checked"));
             console.log($("#kernel-size").val());
+            console.log(input1FramesBuffer.length, input2FramesBuffer.length);
             // Initialize the duration of the output video
             outputDuration = input1FramesBuffer.length;
 
@@ -269,9 +270,9 @@ var effects = {
                     if($("#use-smooth").prop("checked")){
                         blur(imageData,$("#kernel-size").val());
                         for (let i = 0; i < imageData1.data.length; i += 4) {
-                            imageData.data[i] = (imageData.data[i]/255)*imageData1.data[i] + ((255-imageData.data[i])/255)*imageData2.data[i];     // R
-                            imageData.data[i + 1] = (imageData.data[i+1]/255)*imageData1.data[i+1] + ((255-imageData.data[i+1])/255)*imageData2.data[i+1];     // R
-                            imageData.data[i + 2] = (imageData.data[i+2]/255)*imageData1.data[i+2] + ((255-imageData.data[i+2])/255)*imageData2.data[i+2];     // R
+                            imageData.data[i] = (imageData.data[i]/255)*imageData1.data[i] + ((255-imageData.data[i])/255)*imageData2.data[i];
+                            imageData.data[i + 1] = (imageData.data[i+1]/255)*imageData1.data[i+1] + ((255-imageData.data[i+1])/255)*imageData2.data[i+1];
+                            imageData.data[i + 2] = (imageData.data[i+2]/255)*imageData1.data[i+2] + ((255-imageData.data[i+2])/255)*imageData2.data[i+2];
                         }
 
                     }
@@ -281,8 +282,13 @@ var effects = {
                     ctx.putImageData(imageData, 0, 0);
                     outputFramesBuffer[idx] = canvas.toDataURL("image/webp");
                     finishFrame();
-                 };
-                back_img.src = input2FramesBuffer[idx];
+                };
+                if( idx < input2FramesBuffer.length){
+                    back_img.src = input2FramesBuffer[idx];
+                }else{
+                    back_img.src = input1FramesBuffer[idx];// prevetn BG video shorter than foreground
+                }
+                
             };
             front_img.src = input1FramesBuffer[idx];
         }
@@ -374,27 +380,46 @@ var effects = {
                             imageData.data[i + 1] = imageData2.data[i+1];
                             imageData.data[i + 2] = imageData2.data[i+2];
 
-                            // imageData.data[i] = 0;
-                            // imageData.data[i + 1] = 0;
-                            // imageData.data[i + 2] = 0;
+                            if($("#use-smooth").prop("checked")){
+                                imageData.data[i] = 0;
+                                imageData.data[i + 1] = 0;
+                                imageData.data[i + 2] = 0;
+                            }
                         } else {
                             //console.log("keep");
                             // Else, keep the original pixel from the foreground image
                             imageData.data[i] = imageData1.data[i];     // R
                             imageData.data[i + 1] = imageData1.data[i + 1]; // G
                             imageData.data[i + 2] = imageData1.data[i + 2]; // B
-                            // Copy alpha value
-                            imageData.data[i + 3] = imageData1.data[i + 3]; // A
+                            
+                            if($("#use-smooth").prop("checked")){
+                                imageData.data[i] = 255;
+                                imageData.data[i + 1] = 255;
+                                imageData.data[i + 2] = 255;
+                            }
                         }
                     }
 
+                    if($("#use-smooth").prop("checked")){
+                        blur(imageData,$("#kernel-size").val());
+                        for (let i = 0; i < imageData1.data.length; i += 4) {
+                            imageData.data[i] = (imageData.data[i]/255)*imageData1.data[i] + ((255-imageData.data[i])/255)*imageData2.data[i];
+                            imageData.data[i + 1] = (imageData.data[i+1]/255)*imageData1.data[i+1] + ((255-imageData.data[i+1])/255)*imageData2.data[i+1];
+                            imageData.data[i + 2] = (imageData.data[i+2]/255)*imageData1.data[i+2] + ((255-imageData.data[i+2])/255)*imageData2.data[i+2];
+                        }
+
+                    }
 
                     //OUT
                     ctx.putImageData(imageData, 0, 0);
                     outputFramesBuffer[idx] = canvas.toDataURL("image/webp");
                     finishFrame();
-                 };
-                back_img.src = input2FramesBuffer[idx];
+                };
+                if( idx < input2FramesBuffer.length){
+                    back_img.src = input2FramesBuffer[idx];
+                }else{
+                    back_img.src = input1FramesBuffer[idx];// prevetn BG video shorter than foreground
+                }
             };
             front_img.src = input1FramesBuffer[idx];
         }
@@ -557,8 +582,12 @@ var effects = {
                     ctx.putImageData(imageData, 0, 0);
                     outputFramesBuffer[idx] = canvas.toDataURL("image/webp");
                     finishFrame();
-                 };
-                back_img.src = input2FramesBuffer[idx];
+                };
+                if( idx < input2FramesBuffer.length){
+                    back_img.src = input2FramesBuffer[idx];
+                }else{
+                    back_img.src = input1FramesBuffer[idx];// prevetn BG video shorter than foreground
+                }
             };
             front_img.src = input1FramesBuffer[idx];
         }
