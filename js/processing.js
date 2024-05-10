@@ -459,7 +459,8 @@ var effects = {
              /*
              * TODO
              */        
-            var imageData = ctx.getImageData(0, 0, w1, h1);
+            var imageData = ctx.getImageData(0, 0, w1, h1)
+            var alphaData = Array(w1*h1).fill(0.000000)
             //console.log(TOLERANCE);
             
             let KEY_R = 0;
@@ -504,12 +505,12 @@ var effects = {
 
                         // Compute Unknowns
                         var alpha = 1-(g-k*b)/(KEY_G-k*KEY_B)
-                        // if(alpha > 1){
-                        //     alpha = 1
-                        // }
-                        // if(alpha < 0){
-                        //     alpha = 0
-                        // }
+                        if(alpha > 1){
+                            alpha = 1
+                        }
+                        if(alpha < 0){
+                            alpha = 0
+                        }
                         var R_Foreground = (r-KEY_R*(1-alpha))
                         var G_Foreground = (g-KEY_G*(1-alpha))
                         var B_Foreground = (b-KEY_B*(1-alpha))
@@ -548,12 +549,16 @@ var effects = {
                         // imageData.data[i]     =  R_Foreground
                         // imageData.data[i + 1] =  G_Foreground
                         // imageData.data[i + 2] =  B_Foreground
-                        // imageData.data[i]     =  imageData2.data[i]      * (1-alpha)
-                        // imageData.data[i + 1] =  imageData2.data[i+1]      * (1-alpha)
-                        // imageData.data[i + 2] =  imageData2.data[i+2]      * (1-alpha)
                         // imageData.data[i]     =  alpha*255
                         // imageData.data[i + 1] =  alpha*255
                         // imageData.data[i + 2] =  alpha*255
+                        // imageData.data[i]     =  imageData2.data[i]      * (1-alpha)
+                        // imageData.data[i + 1] =  imageData2.data[i+1]      * (1-alpha)
+                        // imageData.data[i + 2] =  imageData2.data[i+2]      * (1-alpha)
+                        // alphaData[i]     =  alpha
+                        // alphaData[i + 1] =  alpha
+                        // alphaData[i + 2] =  alpha
+                        // alphaData[i + 3] =  alpha
 
                         if(imageData.data[i] > 255){
                             imageData.data[i] = 255
@@ -579,6 +584,54 @@ var effects = {
 
 
                     }
+
+                    // for(var i = 0; i< alphaData.length ; i+=4){
+                    //     const alphaArr = []
+                    //     for(var j  = -4;  j <=4 ;j+=4){
+                    //         for(var k = -4;k<=4;k+=4){
+                    //             try{
+                    //                 alphaArr.push(alphaData.data[i+(j*w1)+k])
+
+                    //             }catch(error){
+                    //                 continue
+                    //             }
+                    //         }
+                    //     }
+                    //     var sortedAlpha = alphaArr.slice().sort((a, b) => a - b)
+                    //     let alpha
+                    //     const middleIndex = Math.floor(sortedAlpha.length / 2);
+                    //     let median;
+
+                    //     if (sortedAlpha.length % 2 === 0) {
+                    //         median = (sortedAlpha[middleIndex - 1] + sortedAlpha[middleIndex]) / 2;
+                    //     } else {
+                    //         median = sortedAlpha[middleIndex];
+                    //     }
+                    //     let maxAlpha = Math.max(...alphaArr)
+                    //     let minAlpha = Math.min(...alphaArr)
+                    //     if((maxAlpha - median) > (median - minAlpha)){
+                    //         alpha = minAlpha
+
+                    //     }else{
+                    //         alpha = maxAlpha
+
+                    //     }
+                    //     let r = imageData1.data[i];
+                    //     let g = imageData1.data[i + 1];
+                    //     let b = imageData1.data[i + 2];
+                    //     var R_Foreground = (r-KEY_R*(1-alpha))
+                    //     var G_Foreground = (g-KEY_G*(1-alpha))
+                    //     var B_Foreground = (b-KEY_B*(1-alpha))
+                    //     imageData.data[i]     =  R_Foreground  + imageData2.data[i]      * (1-alpha);// Red
+                    //     imageData.data[i + 1] =  G_Foreground  + imageData2.data[i+1]    * (1-alpha);// Green
+                    //     imageData.data[i + 2] =  B_Foreground  + imageData2.data[i+2]    * (1-alpha);// Blue
+                    //     imageData.data[i]     =  alpha*255
+                    //     imageData.data[i + 1] =  alpha*255
+                    //     imageData.data[i + 2] =  alpha*255
+                    //     if(alphaData[i]!=0){
+                    //         console.log(alphaData[i])
+                    //     }
+                    // }
 
 
                     //OUT
