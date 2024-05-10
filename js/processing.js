@@ -551,6 +551,9 @@ var effects = {
                         // imageData.data[i]     =  imageData2.data[i]      * (1-alpha)
                         // imageData.data[i + 1] =  imageData2.data[i+1]      * (1-alpha)
                         // imageData.data[i + 2] =  imageData2.data[i+2]      * (1-alpha)
+                        // imageData.data[i]     =  alpha*255
+                        // imageData.data[i + 1] =  alpha*255
+                        // imageData.data[i + 2] =  alpha*255
 
                         if(imageData.data[i] > 255){
                             imageData.data[i] = 255
